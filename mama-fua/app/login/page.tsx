@@ -80,6 +80,26 @@ export default function Login() {
       <div className="max-w-md w-full">
         {/* Logo/Brand */}
         <div className="text-center mb-8">
+          <button
+            onClick={() => router.push("/")}
+            className="inline-flex items-center gap-3 hover:opacity-80 transition-opacity mb-4"
+          >
+            <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-full p-3">
+              <svg
+                className="w-8 h-8 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+                />
+              </svg>
+            </div>
+          </button>
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Mama Fua</h1>
           <p className="text-gray-600">Professional Laundry Services</p>
         </div>

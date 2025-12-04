@@ -64,3 +64,77 @@ export async function GET() {
     total: bookings.length,
   });
 }
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { id, status } = body;
+
+    if (!id || !status) {
+      return NextResponse.json(
+        { error: "Booking ID and status are required" },
+        { status: 400 }
+      );
+    }
+
+    // Find and update booking
+    const bookingIndex = bookings.findIndex((b) => b.id === id);
+
+    if (bookingIndex === -1) {
+      return NextResponse.json(
+        { error: "Booking not found" },
+        { status: 404 }
+      );
+    }
+
+    bookings[bookingIndex].status = status;
+
+    return NextResponse.json({
+      success: true,
+      message: "Booking status updated successfully",
+      booking: bookings[bookingIndex],
+    });
+  } catch (error) {
+    console.error("Update error:", error);
+    return NextResponse.json(
+      { error: "Failed to update booking" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "Booking ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const bookingIndex = bookings.findIndex((b) => b.id === id);
+
+    if (bookingIndex === -1) {
+      return NextResponse.json(
+        { error: "Booking not found" },
+        { status: 404 }
+      );
+    }
+
+    bookings.splice(bookingIndex, 1);
+
+    return NextResponse.json({
+      success: true,
+      message: "Booking deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete error:", error);
+    return NextResponse.json(
+      { error: "Failed to delete booking" },
+      { status: 500 }
+    );
+  }
+}

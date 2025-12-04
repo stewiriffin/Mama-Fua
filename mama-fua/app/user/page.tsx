@@ -2,6 +2,18 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useToast, ToastContainer } from "../components/Toast";
+import { DashboardSkeleton } from "../components/LoadingSkeleton";
+import {
+  validateEmail,
+  validatePhone,
+  validateName,
+  validateAddress,
+  validateWeight,
+  formatPhoneNumber,
+  formatCurrency,
+  formatRelativeTime,
+} from "../utils/validation";
 
 interface User {
   id: string;
@@ -24,6 +36,7 @@ interface Booking {
 
 export default function UserDashboard() {
   const router = useRouter();
+  const toast = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,15 +45,16 @@ export default function UserDashboard() {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [cancelingBooking, setCancelingBooking] = useState<string | null>(null);
-  const [showNewBookingModal, setShowNewBookingModal] = useState(false);
-  const [newBookingForm, setNewBookingForm] = useState({
+  const [showBookingForm, setShowBookingForm] = useState(false);
+  const [bookingForm, setBookingForm] = useState({
     planId: "premium",
     weight: 0,
     name: "",
-    email: user?.email || "",
+    email: "",
     phone: "",
     address: "",
   });
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
 
   useEffect(() => {
@@ -69,7 +83,7 @@ export default function UserDashboard() {
       if (data.success) {
         // Filter bookings for current user
         const userBookings = data.bookings.filter(
-          (b: any) => b.email === email
+          (b: Booking) => b.email === email
         );
         setBookings(userBookings);
       }
@@ -86,7 +100,7 @@ export default function UserDashboard() {
   };
 
   const getPlanName = (planId: string) => {
-    const plans: unknown = {
+    const plans: Record<string, string> = {
       basic: "Basic Wash",
       premium: "Premium Care",
       deluxe: "Deluxe Service",
@@ -95,7 +109,7 @@ export default function UserDashboard() {
   };
 
   const getPlanPrice = (planId: string) => {
-    const prices: unknown = {
+    const prices: Record<string, number> = {
       basic: 50,
       premium: 75,
       deluxe: 100,
@@ -211,8 +225,7 @@ export default function UserDashboard() {
 
   const handleRebook = (booking: Booking) => {
     // Pre-fill form with booking data
-    setNewBookingForm({
-      ...newBookingForm,
+    setBookingForm({
       planId: booking.planId,
       weight: booking.weight,
       name: booking.name,
@@ -220,20 +233,50 @@ export default function UserDashboard() {
       phone: booking.phone,
       address: booking.address,
     });
-    setShowNewBookingModal(true);
+    setShowBookingForm(true);
+    // Scroll to booking form
+    setTimeout(() => {
+      document.getElementById("booking-form")?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   };
 
-  const handleNewBookingFormChange = (
+  const handleBookingFormChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    setNewBookingForm({
-      ...newBookingForm,
+    setBookingForm({
+      ...bookingForm,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmitNewBooking = async (e: React.FormEvent) => {
+  const handleSubmitBooking = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormErrors({});
+
+    // Validate all fields
+    const errors: Record<string, string> = {};
+
+    const nameValidation = validateName(bookingForm.name);
+    if (!nameValidation.valid) errors.name = nameValidation.error!;
+
+    const emailValidation = validateEmail(bookingForm.email);
+    if (!emailValidation.valid) errors.email = emailValidation.error!;
+
+    const phoneValidation = validatePhone(bookingForm.phone);
+    if (!phoneValidation.valid) errors.phone = phoneValidation.error!;
+
+    const addressValidation = validateAddress(bookingForm.address);
+    if (!addressValidation.valid) errors.address = addressValidation.error!;
+
+    const weightValidation = validateWeight(bookingForm.weight);
+    if (!weightValidation.valid) errors.weight = weightValidation.error!;
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      toast.error("Please fix the validation errors before submitting");
+      return;
+    }
+
     setIsSubmittingBooking(true);
 
     try {
@@ -242,32 +285,45 @@ export default function UserDashboard() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(newBookingForm),
+        body: JSON.stringify(bookingForm),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        alert(`Booking successful! Your booking ID is ${data.booking.id}`);
-        setShowNewBookingModal(false);
+        const bookingId = data.booking.id;
+
         // Reset form
-        setNewBookingForm({
+        setBookingForm({
           planId: "premium",
           weight: 0,
-          name: "",
+          name: user?.name || "",
           email: user?.email || "",
           phone: "",
           address: "",
         });
+        setFormErrors({});
+
         // Refresh bookings
         if (user) {
-          fetchUserBookings(user.email);
+          await fetchUserBookings(user.email);
         }
+
+        // Hide form and show success
+        setShowBookingForm(false);
+
+        // Scroll back to top
+        window.scrollTo({ top: 0, behavior: "smooth" });
+
+        // Show success toast
+        setTimeout(() => {
+          toast.success(`Booking created successfully! Your booking ID is ${bookingId}. We'll contact you soon.`);
+        }, 300);
       } else {
-        alert(data.error || "Failed to create booking. Please try again.");
+        toast.error(data.error || "Failed to create booking. Please try again.");
       }
     } catch (error) {
-      alert("An error occurred. Please try again later.");
+      toast.error("An error occurred. Please try again later.");
     } finally {
       setIsSubmittingBooking(false);
     }
@@ -307,14 +363,7 @@ export default function UserDashboard() {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-200 border-t-purple-600 mx-auto"></div>
-          <p className="mt-6 text-lg text-gray-600 font-medium">Loading your dashboard...</p>
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   if (!user) {
@@ -322,7 +371,9 @@ export default function UserDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <>
+      <ToastContainer toasts={toast.toasts} removeToast={toast.removeToast} />
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
       <header className="bg-white shadow-lg border-b-4 border-gradient-to-r from-blue-500 to-purple-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -354,10 +405,23 @@ export default function UserDashboard() {
             </div>
             <div className="flex gap-3">
               <button
-                onClick={() => setShowNewBookingModal(true)}
+                onClick={() => router.push("/")}
+                className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all duration-300 hidden sm:block"
+              >
+                🏠 Home
+              </button>
+              <button
+                onClick={() => {
+                  setShowBookingForm(!showBookingForm);
+                  if (!showBookingForm) {
+                    setTimeout(() => {
+                      document.getElementById("booking-form")?.scrollIntoView({ behavior: "smooth" });
+                    }, 100);
+                  }
+                }}
                 className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
-                + New Booking
+                {showBookingForm ? "Hide Form" : "+ New Booking"}
               </button>
               <button
                 onClick={handleLogout}
@@ -481,6 +545,215 @@ export default function UserDashboard() {
             </div>
           </div>
         </div>
+
+        {/* New Booking Form */}
+        {showBookingForm && (
+          <div id="booking-form" className="bg-white rounded-2xl shadow-2xl p-8 mb-8 border-2 border-purple-200">
+            <div className="mb-6">
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                Create New Booking
+              </h2>
+              <p className="text-gray-600">Fill in the details below to book your laundry service</p>
+            </div>
+
+            <form onSubmit={handleSubmitBooking} className="space-y-6">
+              {/* Plan Selection */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-3">
+                  Select Service Plan
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {[
+                    { id: "basic", name: "Basic Wash", price: 50, icon: "🧺", color: "from-blue-500 to-cyan-500" },
+                    { id: "premium", name: "Premium Care", price: 75, icon: "✨", color: "from-purple-500 to-pink-500" },
+                    { id: "deluxe", name: "Deluxe Service", price: 100, icon: "👑", color: "from-amber-500 to-orange-500" },
+                  ].map((plan) => (
+                    <button
+                      key={plan.id}
+                      type="button"
+                      onClick={() => setBookingForm({ ...bookingForm, planId: plan.id })}
+                      className={`p-6 rounded-2xl border-2 transition-all duration-300 transform hover:scale-105 ${
+                        bookingForm.planId === plan.id
+                          ? `border-purple-500 bg-gradient-to-r ${plan.color} bg-opacity-10 shadow-xl`
+                          : "border-gray-200 hover:border-purple-300 hover:shadow-lg"
+                      }`}
+                    >
+                      <div className="text-5xl mb-3">{plan.icon}</div>
+                      <div className="font-bold text-lg text-gray-900">{plan.name}</div>
+                      <div className="text-purple-600 font-bold text-2xl mt-2">
+                        KES {plan.price}
+                        <span className="text-sm text-gray-600">/kg</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Weight Input */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Weight of Clothes (kg)
+                </label>
+                <input
+                  type="number"
+                  name="weight"
+                  value={bookingForm.weight || ""}
+                  onChange={handleBookingFormChange}
+                  required
+                  min="0.5"
+                  step="0.5"
+                  className={`w-full px-4 py-3 text-lg border-2 rounded-xl focus:ring-2 transition-all ${
+                    formErrors.weight
+                      ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+                  }`}
+                  placeholder="Enter weight in kg"
+                />
+                {formErrors.weight && (
+                  <p className="mt-1 text-sm text-red-600">{formErrors.weight}</p>
+                )}
+                <div className="grid grid-cols-4 gap-2 mt-3">
+                  {[5, 10, 15, 20].map((val) => (
+                    <button
+                      key={val}
+                      type="button"
+                      onClick={() => setBookingForm({ ...bookingForm, weight: val })}
+                      className="px-4 py-2 bg-gradient-to-r from-gray-100 to-gray-200 hover:from-purple-100 hover:to-blue-100 rounded-lg font-semibold text-gray-700 hover:text-purple-700 transition-all"
+                    >
+                      {val} kg
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Name */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={bookingForm.name}
+                    onChange={handleBookingFormChange}
+                    required
+                    className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 transition-all ${
+                      formErrors.name
+                        ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                        : "border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+                    }`}
+                    placeholder="John Doe"
+                  />
+                  {formErrors.name && (
+                    <p className="mt-1 text-sm text-red-600">{formErrors.name}</p>
+                  )}
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={bookingForm.email}
+                    onChange={handleBookingFormChange}
+                    required
+                    className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 transition-all ${
+                      formErrors.email
+                        ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                        : "border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+                    }`}
+                    placeholder="john@example.com"
+                  />
+                  {formErrors.email && (
+                    <p className="mt-1 text-sm text-red-600">{formErrors.email}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Phone */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={bookingForm.phone}
+                  onChange={handleBookingFormChange}
+                  required
+                  className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 transition-all ${
+                    formErrors.phone
+                      ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+                  }`}
+                  placeholder="+254 700 000 000"
+                />
+                {formErrors.phone && (
+                  <p className="mt-1 text-sm text-red-600">{formErrors.phone}</p>
+                )}
+              </div>
+
+              {/* Address */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Pickup Address
+                </label>
+                <textarea
+                  name="address"
+                  value={bookingForm.address}
+                  onChange={handleBookingFormChange}
+                  required
+                  rows={3}
+                  className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 transition-all ${
+                    formErrors.address
+                      ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+                  }`}
+                  placeholder="Enter your full address"
+                />
+                {formErrors.address && (
+                  <p className="mt-1 text-sm text-red-600">{formErrors.address}</p>
+                )}
+              </div>
+
+              {/* Total Display */}
+              {bookingForm.weight > 0 && (
+                <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl p-6 border-2 border-purple-200">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xl font-bold text-gray-900">
+                      Estimated Total:
+                    </span>
+                    <span className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                      {formatCurrency(getPlanPrice(bookingForm.planId) * bookingForm.weight)}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex gap-4 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowBookingForm(false)}
+                  className="flex-1 bg-gray-200 text-gray-700 py-4 rounded-xl font-bold text-lg hover:bg-gray-300 transition-all duration-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingBooking || bookingForm.weight <= 0}
+                  className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmittingBooking ? "Creating Booking..." : "Confirm Booking"}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
 
         {/* Filters and Sorting */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
@@ -606,11 +879,7 @@ export default function UserDashboard() {
                         {getPlanName(booking.planId)}
                       </h3>
                       <p className="text-sm text-gray-500">
-                        {new Date(booking.createdAt).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
+                        {formatRelativeTime(booking.createdAt)}
                       </p>
                     </div>
                   </div>
@@ -642,13 +911,13 @@ export default function UserDashboard() {
                     <div>
                       <p className="text-xs text-gray-600 mb-1">Rate</p>
                       <p className="font-bold text-sm text-gray-900">
-                        KES {getPlanPrice(booking.planId)}/kg
+                        {formatCurrency(getPlanPrice(booking.planId))}/kg
                       </p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-600 mb-1">Total Amount</p>
                       <p className="font-bold text-lg text-purple-600">
-                        KES {getPlanPrice(booking.planId) * booking.weight}
+                        {formatCurrency(getPlanPrice(booking.planId) * booking.weight)}
                       </p>
                     </div>
                   </div>
@@ -685,204 +954,6 @@ export default function UserDashboard() {
           </div>
         )}
       </main>
-
-      {/* New Booking Modal */}
-      {showNewBookingModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-6 rounded-t-2xl">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="text-2xl font-bold mb-2">Create New Booking</h3>
-                  <p className="text-purple-100 text-sm">
-                    Book your laundry service in minutes
-                  </p>
-                </div>
-                <button
-                  onClick={() => setShowNewBookingModal(false)}
-                  className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-2 transition-all"
-                >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            <form onSubmit={handleSubmitNewBooking} className="p-6 space-y-6">
-              {/* Plan Selection */}
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-3">
-                  Select Service Plan
-                </label>
-                <div className="grid grid-cols-3 gap-4">
-                  {[
-                    { id: "basic", name: "Basic Wash", price: 50, icon: "🧺" },
-                    { id: "premium", name: "Premium Care", price: 75, icon: "✨" },
-                    { id: "deluxe", name: "Deluxe Service", price: 100, icon: "👑" },
-                  ].map((plan) => (
-                    <button
-                      key={plan.id}
-                      type="button"
-                      onClick={() => setNewBookingForm({ ...newBookingForm, planId: plan.id })}
-                      className={`p-4 rounded-xl border-2 transition-all ${
-                        newBookingForm.planId === plan.id
-                          ? "border-purple-500 bg-purple-50 shadow-lg"
-                          : "border-gray-200 hover:border-purple-300"
-                      }`}
-                    >
-                      <div className="text-3xl mb-2">{plan.icon}</div>
-                      <div className="font-bold text-sm text-gray-900">{plan.name}</div>
-                      <div className="text-purple-600 font-bold text-lg">
-                        KES {plan.price}
-                        <span className="text-xs text-gray-600">/kg</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Weight Input */}
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
-                  Weight of Clothes (kg)
-                </label>
-                <input
-                  type="number"
-                  name="weight"
-                  value={newBookingForm.weight || ""}
-                  onChange={handleNewBookingFormChange}
-                  required
-                  min="0.5"
-                  step="0.5"
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                  placeholder="Enter weight in kg"
-                />
-                <div className="flex gap-2 mt-2">
-                  {[5, 10, 15, 20].map((val) => (
-                    <button
-                      key={val}
-                      type="button"
-                      onClick={() => setNewBookingForm({ ...newBookingForm, weight: val })}
-                      className="flex-1 px-3 py-2 bg-gray-100 hover:bg-purple-100 rounded-lg text-sm font-semibold text-gray-700 hover:text-purple-700 transition-all"
-                    >
-                      {val} kg
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                {/* Name */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={newBookingForm.name}
-                    onChange={handleNewBookingFormChange}
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                    placeholder="John Doe"
-                  />
-                </div>
-
-                {/* Email */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={newBookingForm.email}
-                    onChange={handleNewBookingFormChange}
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                    placeholder="john@example.com"
-                  />
-                </div>
-              </div>
-
-              {/* Phone */}
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={newBookingForm.phone}
-                  onChange={handleNewBookingFormChange}
-                  required
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                  placeholder="+254 700 000 000"
-                />
-              </div>
-
-              {/* Address */}
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
-                  Pickup Address
-                </label>
-                <textarea
-                  name="address"
-                  value={newBookingForm.address}
-                  onChange={handleNewBookingFormChange}
-                  required
-                  rows={3}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                  placeholder="Enter your full address"
-                />
-              </div>
-
-              {/* Total Display */}
-              {newBookingForm.weight > 0 && (
-                <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-6">
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg font-bold text-gray-900">
-                      Estimated Total:
-                    </span>
-                    <span className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                      KES {getPlanPrice(newBookingForm.planId) * newBookingForm.weight}
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowNewBookingModal(false)}
-                  className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-300 transition-all duration-300"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmittingBooking || newBookingForm.weight <= 0}
-                  className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSubmittingBooking ? "Creating Booking..." : "Confirm Booking"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* Booking Details Modal */}
       {showDetailsModal && selectedBooking && (
@@ -1009,7 +1080,7 @@ export default function UserDashboard() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Phone Number</p>
-                    <p className="font-semibold text-gray-900">{selectedBooking.phone}</p>
+                    <p className="font-semibold text-gray-900">{formatPhoneNumber(selectedBooking.phone)}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Pickup Address</p>
@@ -1095,5 +1166,6 @@ export default function UserDashboard() {
         </div>
       )}
     </div>
+    </>
   );
 }

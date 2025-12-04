@@ -1,6 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useToast, ToastContainer } from "./components/Toast";
+import {
+  validateEmail,
+  validatePhone,
+  validateName,
+  validateAddress,
+  validateWeight,
+} from "./utils/validation";
 
 interface BookingForm {
   name: string;
@@ -10,6 +18,7 @@ interface BookingForm {
 }
 
 export default function Home() {
+  const toast = useToast();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [weight, setWeight] = useState<number>(0);
   const [showBookingForm, setShowBookingForm] = useState(false);
@@ -19,6 +28,7 @@ export default function Home() {
     phone: "",
     address: "",
   });
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState<{
     type: "success" | "error";
@@ -107,8 +117,38 @@ export default function Home() {
 
   const handleSubmitBooking = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setFormErrors({});
     setSubmitMessage(null);
+
+    // Validate all fields
+    const errors: Record<string, string> = {};
+
+    const nameValidation = validateName(bookingForm.name);
+    if (!nameValidation.valid) errors.name = nameValidation.error!;
+
+    const emailValidation = validateEmail(bookingForm.email);
+    if (!emailValidation.valid) errors.email = emailValidation.error!;
+
+    const phoneValidation = validatePhone(bookingForm.phone);
+    if (!phoneValidation.valid) errors.phone = phoneValidation.error!;
+
+    const addressValidation = validateAddress(bookingForm.address);
+    if (!addressValidation.valid) errors.address = addressValidation.error!;
+
+    const weightValidation = validateWeight(weight);
+    if (!weightValidation.valid) errors.weight = weightValidation.error!;
+
+    if (!selectedPlan) {
+      errors.plan = "Please select a service plan";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      toast.error("Please fix the validation errors before submitting");
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
       const response = await fetch("/api/bookings", {
@@ -126,10 +166,7 @@ export default function Home() {
       const data = await response.json();
 
       if (response.ok) {
-        setSubmitMessage({
-          type: "success",
-          text: `Booking successful! Your booking ID is ${data.booking.id}. We'll contact you soon.`,
-        });
+        toast.success(`Booking created successfully! Your booking ID is ${data.booking.id}. We'll contact you soon.`);
         // Reset form
         setBookingForm({
           name: "",
@@ -137,32 +174,37 @@ export default function Home() {
           phone: "",
           address: "",
         });
+        setFormErrors({});
         setShowBookingForm(false);
         setSelectedPlan(null);
         setWeight(0);
+
+        // Scroll to top after successful booking
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }, 500);
       } else {
-        setSubmitMessage({
-          type: "error",
-          text: data.error || "Failed to create booking. Please try again.",
-        });
+        toast.error(data.error || "Failed to create booking. Please try again.");
       }
     } catch (error) {
-      setSubmitMessage({
-        type: "error",
-        text: "An error occurred. Please try again later.",
-      });
+      toast.error("An error occurred. Please try again later.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <>
+      <ToastContainer toasts={toast.toasts} removeToast={toast.removeToast} />
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Enhanced Header */}
       <header className="bg-white shadow-lg sticky top-0 z-40 backdrop-blur-sm bg-opacity-95">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+            >
               <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-full p-2">
                 <svg
                   className="w-6 h-6 text-white"
@@ -186,13 +228,29 @@ export default function Home() {
                   Professional Laundry Services
                 </p>
               </div>
+            </button>
+            <div className="flex items-center gap-4">
+              <nav className="hidden md:flex items-center gap-6">
+                <button
+                  onClick={() => document.getElementById("calculator")?.scrollIntoView({ behavior: "smooth" })}
+                  className="text-gray-700 hover:text-purple-600 font-medium transition-colors"
+                >
+                  Book Now
+                </button>
+                <button
+                  onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
+                  className="text-gray-700 hover:text-purple-600 font-medium transition-colors"
+                >
+                  Contact
+                </button>
+              </nav>
+              <a
+                href="/login"
+                className="px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              >
+                Login
+              </a>
             </div>
-            <a
-              href="/login"
-              className="px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-            >
-              Login
-            </a>
           </div>
         </div>
       </header>
@@ -217,120 +275,16 @@ export default function Home() {
                 Professional laundry service at affordable prices. Fast pickup,
                 quality cleaning, and hassle-free delivery.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button
-                  onClick={() =>
-                    document
-                      .getElementById("calculator")
-                      ?.scrollIntoView({ behavior: "smooth" })
-                  }
-                  className="px-8 py-4 bg-white text-purple-600 rounded-xl font-bold text-lg hover:bg-purple-50 transition-all shadow-2xl hover:shadow-purple-500/50 transform hover:-translate-y-1"
-                >
-                  Book Now
-                </button>
-                <button
-                  onClick={() =>
-                    document
-                      .getElementById("how-it-works")
-                      ?.scrollIntoView({ behavior: "smooth" })
-                  }
-                  className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-xl font-bold text-lg hover:bg-white hover:text-purple-600 transition-all transform hover:-translate-y-1"
-                >
-                  How It Works
-                </button>
-              </div>
-
-              {/* Stats */}
-              <div className="grid grid-cols-3 gap-8 mt-16 max-w-3xl mx-auto">
-                <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-6">
-                  <div className="text-4xl font-bold">500+</div>
-                  <div className="text-purple-100 text-sm mt-2">
-                    Happy Customers
-                  </div>
-                </div>
-                <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-6">
-                  <div className="text-4xl font-bold">24hr</div>
-                  <div className="text-purple-100 text-sm mt-2">
-                    Fast Turnaround
-                  </div>
-                </div>
-                <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-6">
-                  <div className="text-4xl font-bold">100%</div>
-                  <div className="text-purple-100 text-sm mt-2">
-                    Satisfaction
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* How It Works */}
-        <section id="how-it-works" className="py-20 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h3 className="text-4xl font-bold text-gray-900 mb-4">
-                How It Works
-              </h3>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Get your laundry done in 3 simple steps
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="relative group">
-                <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
-                  <div className="bg-gradient-to-r from-blue-500 to-cyan-500 w-16 h-16 rounded-full flex items-center justify-center mb-6 mx-auto transform group-hover:scale-110 transition-transform">
-                    <span className="text-3xl">📦</span>
-                  </div>
-                  <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center absolute -top-3 -right-3 font-bold">
-                    1
-                  </div>
-                  <h4 className="text-2xl font-bold text-gray-900 mb-3 text-center">
-                    Book Online
-                  </h4>
-                  <p className="text-gray-600 text-center">
-                    Choose your plan, enter weight, and schedule a pickup time
-                    that works for you.
-                  </p>
-                </div>
-              </div>
-
-              <div className="relative group">
-                <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
-                  <div className="bg-gradient-to-r from-purple-500 to-pink-500 w-16 h-16 rounded-full flex items-center justify-center mb-6 mx-auto transform group-hover:scale-110 transition-transform">
-                    <span className="text-3xl">✨</span>
-                  </div>
-                  <div className="bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center absolute -top-3 -right-3 font-bold">
-                    2
-                  </div>
-                  <h4 className="text-2xl font-bold text-gray-900 mb-3 text-center">
-                    We Clean
-                  </h4>
-                  <p className="text-gray-600 text-center">
-                    Our professionals pick up, wash, dry, and fold your clothes
-                    with care.
-                  </p>
-                </div>
-              </div>
-
-              <div className="relative group">
-                <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
-                  <div className="bg-gradient-to-r from-amber-500 to-orange-500 w-16 h-16 rounded-full flex items-center justify-center mb-6 mx-auto transform group-hover:scale-110 transition-transform">
-                    <span className="text-3xl">🚚</span>
-                  </div>
-                  <div className="bg-orange-600 text-white rounded-full w-8 h-8 flex items-center justify-center absolute -top-3 -right-3 font-bold">
-                    3
-                  </div>
-                  <h4 className="text-2xl font-bold text-gray-900 mb-3 text-center">
-                    Fast Delivery
-                  </h4>
-                  <p className="text-gray-600 text-center">
-                    Receive fresh, clean clothes delivered right to your
-                    doorstep.
-                  </p>
-                </div>
-              </div>
+              <button
+                onClick={() =>
+                  document
+                    .getElementById("calculator")
+                    ?.scrollIntoView({ behavior: "smooth" })
+                }
+                className="px-12 py-5 bg-white text-purple-600 rounded-2xl font-bold text-xl hover:bg-purple-50 transition-all shadow-2xl hover:shadow-purple-500/50 transform hover:-translate-y-1"
+              >
+                Get Started - Book Now
+              </button>
             </div>
           </div>
         </section>
@@ -569,50 +523,103 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Footer */}
-        <footer className="bg-gray-900 text-white py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-              <div>
-                <h4 className="text-2xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                  Mama Fua
-                </h4>
-                <p className="text-gray-400">
-                  Professional laundry services delivered to your doorstep.
-                </p>
-              </div>
-              <div>
-                <h5 className="font-bold mb-4">Services</h5>
-                <ul className="space-y-2 text-gray-400">
-                  <li>Wash & Fold</li>
-                  <li>Iron & Press</li>
-                  <li>Dry Cleaning</li>
-                  <li>Stain Treatment</li>
-                </ul>
-              </div>
-              <div>
-                <h5 className="font-bold mb-4">Company</h5>
-                <ul className="space-y-2 text-gray-400">
-                  <li>About Us</li>
-                  <li>Contact</li>
-                  <li>Careers</li>
-                  <li>Blog</li>
-                </ul>
-              </div>
-              <div>
-                <h5 className="font-bold mb-4">Contact</h5>
-                <ul className="space-y-2 text-gray-400">
-                  <li>📞 +254 700 000 000</li>
-                  <li>📧 info@mamafua.com</li>
-                  <li>📍 Nairobi, Kenya</li>
-                </ul>
+        {/* Contact Section */}
+        <section id="contact" className="py-16 bg-gradient-to-br from-purple-50 via-white to-blue-50">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h3 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-4">
+                Get In Touch
+              </h3>
+              <p className="text-xl text-gray-600">
+                We're here to help with all your laundry needs
+              </p>
+            </div>
+
+            <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <a
+                  href="tel:+254700000000"
+                  className="flex flex-col items-center p-6 rounded-2xl hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-300 group"
+                >
+                  <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-full p-4 mb-4 group-hover:scale-110 transition-transform">
+                    <svg
+                      className="w-8 h-8 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                      />
+                    </svg>
+                  </div>
+                  <h4 className="text-lg font-bold text-gray-900 mb-2">Call Us</h4>
+                  <p className="text-purple-600 font-semibold">+254 700 000 000</p>
+                  <p className="text-sm text-gray-500 mt-1">Mon-Sat, 8am-8pm</p>
+                </a>
+
+                <a
+                  href="mailto:info@mamafua.com"
+                  className="flex flex-col items-center p-6 rounded-2xl hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-300 group"
+                >
+                  <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-full p-4 mb-4 group-hover:scale-110 transition-transform">
+                    <svg
+                      className="w-8 h-8 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </div>
+                  <h4 className="text-lg font-bold text-gray-900 mb-2">Email Us</h4>
+                  <p className="text-purple-600 font-semibold">info@mamafua.com</p>
+                  <p className="text-sm text-gray-500 mt-1">24/7 support</p>
+                </a>
+
+                <div className="flex flex-col items-center p-6 rounded-2xl hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-300 group">
+                  <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-full p-4 mb-4 group-hover:scale-110 transition-transform">
+                    <svg
+                      className="w-8 h-8 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </svg>
+                  </div>
+                  <h4 className="text-lg font-bold text-gray-900 mb-2">Visit Us</h4>
+                  <p className="text-purple-600 font-semibold text-center">Nairobi, Kenya</p>
+                  <p className="text-sm text-gray-500 mt-1">We deliver citywide</p>
+                </div>
               </div>
             </div>
-            <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
-              <p>© 2024 Mama Fua. All rights reserved.</p>
+
+            <div className="text-center mt-12 text-gray-600">
+              <p className="text-lg font-semibold mb-2">© 2024 Mama Fua - Professional Laundry Services</p>
+              <p className="text-sm">All rights reserved</p>
             </div>
           </div>
-        </footer>
+        </section>
       </main>
 
       {/* Booking Form Modal */}
@@ -746,5 +753,6 @@ export default function Home() {
         </div>
       )}
     </div>
+    </>
   );
 }
