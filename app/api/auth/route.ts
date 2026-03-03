@@ -33,7 +33,7 @@ const generateToken = (user: typeof users[0]): string => {
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password, action } = await request.json();
+    const { email, password, action, name } = await request.json();
 
     if (action === "login") {
       // Validate input

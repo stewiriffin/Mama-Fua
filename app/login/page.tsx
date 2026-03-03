@@ -247,7 +247,7 @@ export default function Login() {
                   required
                   autoComplete={isLogin ? "current-password" : "new-password"}
                   className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                  placeholder={isLogin ? "••••••••" : "Create a password"}
+                  placeholder={isLogin ? "Enter your password" : "Create a password"}
                 />
                 <button
                   type="button"
@@ -371,7 +371,7 @@ export default function Login() {
               onClick={() => router.push("/")}
               className="text-emerald-600 hover:text-emerald-700 font-semibold text-sm"
             >
-              ← Back to Home
+              Back to Home
             </button>
           </div>
         </div>
