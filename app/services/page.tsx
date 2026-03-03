@@ -123,24 +123,45 @@ export default function ServicesPage() {
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="bg-emerald-600 text-white py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl font-bold mb-4">Our Services</h1>
+      {/* Hero with Image */}
+      <section className="relative h-[400px] overflow-hidden">
+        <div className="absolute inset-0">
+          <img 
+            src="https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=1920&q=80" 
+            alt="Professional laundry" 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-emerald-900/80"></div>
+        </div>
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-20">
+          <h1 className="text-4xl font-bold mb-4 text-white">Our Services</h1>
           <p className="text-emerald-100 max-w-2xl mx-auto">
             Professional laundry services tailored to your needs. From everyday wash and fold to specialized dry cleaning.
           </p>
         </div>
       </section>
 
-      {/* Services Grid */}
+      {/* Services Grid with Images */}
       <section className="py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {services.map((service) => (
-              <div key={service.id} className="card p-6">
-                <div className="text-4xl mb-4">{service.icon}</div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{service.title}</h3>
+              <div key={service.id} className="card overflow-hidden">
+                <div className="h-48 overflow-hidden">
+                  <img 
+                    src={service.id === 'wash-fold' ? 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=600&q=80' :
+                         service.id === 'wash-iron' ? 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=600&q=80' :
+                         service.id === 'dry-clean' ? 'https://images.unsplash.com/photo-1545173168-9f1947eebb7f?w=600&q=80' :
+                         service.id === 'bedding' ? 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=600&q=80' :
+                         service.id === 'curtains' ? 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600&q=80' :
+                         'https://images.unsplash.com/photo-1556906781-9a412961c28c?w=600&q=80'}
+                    alt={service.title} 
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                <div className="p-6">
+                  <div className="text-3xl mb-3">{service.icon}</div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{service.title}</h3>
                 <p className="text-gray-600 text-sm mb-4">{service.description}</p>
                 <p className="text-emerald-600 font-bold text-lg mb-4">{service.price}</p>
                 <ul className="space-y-2 mb-6">

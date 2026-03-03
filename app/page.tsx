@@ -220,14 +220,22 @@ export default function Home() {
       </header>
 
       <main>
-        {/* Hero Section */}
-        <section className="bg-emerald-600 text-white py-16">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-2xl mx-auto">
-              <h2 className="text-4xl md:text-5xl font-bold mb-4">
+        {/* Hero Section with Background Image */}
+        <section className="relative h-[500px] md:h-[600px] overflow-hidden">
+          <div className="absolute inset-0">
+            <img 
+              src="https://images.unsplash.com/photo-1545173168-9f1947eebb7f?w=1920&q=80" 
+              alt="Fresh laundry" 
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-900/85 via-emerald-800/75 to-teal-900/85"></div>
+          </div>
+          <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-32">
+            <div className="text-center">
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
                 Fresh, Clean Clothes<br />Delivered to Your Door
               </h2>
-              <p className="text-emerald-100 text-lg mb-8">
+              <p className="text-emerald-100 text-lg mb-8 max-w-xl mx-auto">
                 Professional laundry service at affordable prices. Fast pickup,
                 quality cleaning, and hassle-free delivery.
               </p>
@@ -390,25 +398,95 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Features Section */}
-        <section className="py-16 bg-gray-50 dark:bg-zinc-900">
+        {/* Features Section with Images */}
+        <section className="py-16 bg-white">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-8">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Why Choose Us</h3>
+            <div className="text-center mb-12">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Why Choose Us</h3>
+              <p className="text-gray-600">Professional laundry services you can trust</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[
-                { icon: "🚚", title: "Free Pickup & Delivery", description: "We come to your doorstep" },
-                { icon: "⏱️", title: "Fast Turnaround", description: "24-48 hour service" },
-                { icon: "✨", title: "Quality Guaranteed", description: "Professional cleaning" }
-              ].map((feature, idx) => (
-                <div key={idx} className="card p-6 text-center">
-                  <div className="text-3xl mb-2">{feature.icon}</div>
-                  <h4 className="font-medium text-gray-900 dark:text-white">{feature.title}</h4>
-                  <p className="text-sm text-gray-500">{feature.description}</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="group">
+                <div className="relative h-64 mb-4 rounded-2xl overflow-hidden">
+                  <img 
+                    src="https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=600&q=80" 
+                    alt="Professional washing" 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                  <div className="absolute bottom-4 left-4 text-white">
+                    <div className="text-3xl mb-1">🧺</div>
+                  </div>
                 </div>
-              ))}
+                <h4 className="font-semibold text-gray-900 text-lg">Professional Cleaning</h4>
+                <p className="text-gray-600 text-sm mt-1">State-of-the-art machines and premium detergents for the best clean</p>
+              </div>
+
+              <div className="group">
+                <div className="relative h-64 mb-4 rounded-2xl overflow-hidden">
+                  <img 
+                    src="https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=600&q=80" 
+                    alt="Fast delivery" 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                  <div className="absolute bottom-4 left-4 text-white">
+                    <div className="text-3xl mb-1">🚚</div>
+                  </div>
+                </div>
+                <h4 className="font-semibold text-gray-900 text-lg">Free Pickup & Delivery</h4>
+                <p className="text-gray-600 text-sm mt-1">We collect from your doorstep and deliver back fresh within 24 hours</p>
+              </div>
+
+              <div className="group">
+                <div className="relative h-64 mb-4 rounded-2xl overflow-hidden">
+                  <img 
+                    src="https://images.unsplash.com/photo-1545173168-9f1947eebb7f?w=600&q=80" 
+                    alt="Quality guarantee" 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                  <div className="absolute bottom-4 left-4 text-white">
+                    <div className="text-3xl mb-1">✨</div>
+                  </div>
+                </div>
+                <h4 className="font-semibold text-gray-900 text-lg">Quality Guaranteed</h4>
+                <p className="text-gray-600 text-sm mt-1">100% satisfaction guarantee on every load we wash</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* How It Works Section */}
+        <section className="py-16 bg-emerald-50">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">How It Works</h3>
+              <p className="text-gray-600">Simple steps to fresh laundry</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-emerald-600 text-white rounded-full flex items-center justify-center text-2xl mx-auto mb-4">1</div>
+                <h4 className="font-semibold text-gray-900">Book Online</h4>
+                <p className="text-gray-600 text-sm mt-1">Select your plan and tell us your weight</p>
+              </div>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-emerald-600 text-white rounded-full flex items-center justify-center text-2xl mx-auto mb-4">2</div>
+                <h4 className="font-semibold text-gray-900">We Pick Up</h4>
+                <p className="text-gray-600 text-sm mt-1">Our rider collects your laundry</p>
+              </div>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-emerald-600 text-white rounded-full flex items-center justify-center text-2xl mx-auto mb-4">3</div>
+                <h4 className="font-semibold text-gray-900">We Clean</h4>
+                <p className="text-gray-600 text-sm mt-1">Professional washing and folding</p>
+              </div>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-emerald-600 text-white rounded-full flex items-center justify-center text-2xl mx-auto mb-4">4</div>
+                <h4 className="font-semibold text-gray-900">We Deliver</h4>
+                <p className="text-gray-600 text-sm mt-1">Fresh laundry delivered to you</p>
+              </div>
             </div>
           </div>
         </section>
