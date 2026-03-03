@@ -28,7 +28,7 @@ export function RevenueChart({ bookings, getPlanPrice }: StatsProps) {
     }, {} as Record<string, number>);
 
   const plans = [
-    { id: "basic", name: "Basic", color: "bg-blue-500" },
+    { id: "basic", name: "Basic", color: "bg-emerald-500" },
     { id: "premium", name: "Premium", color: "bg-purple-500" },
     { id: "deluxe", name: "Deluxe", color: "bg-amber-500" },
   ];
@@ -71,7 +71,7 @@ export function BookingStatusChart({ bookings }: { bookings: Booking[] }) {
 
   const statuses = [
     { id: "pending", name: "Pending", color: "bg-yellow-500", icon: "⏳" },
-    { id: "processing", name: "Processing", color: "bg-blue-500", icon: "🔄" },
+    { id: "processing", name: "Processing", color: "bg-emerald-500", icon: "🔄" },
     { id: "completed", name: "Completed", color: "bg-green-500", icon: "✅" },
     { id: "cancelled", name: "Cancelled", color: "bg-red-500", icon: "❌" },
   ];
@@ -82,7 +82,7 @@ export function BookingStatusChart({ bookings }: { bookings: Booking[] }) {
   const buildChartSegments = () => {
     const colors = {
       "bg-yellow-500": "#eab308",
-      "bg-blue-500": "#3b82f6",
+      "bg-emerald-500": "#3b82f6",
       "bg-green-500": "#22c55e",
       "bg-red-500": "#ef4444",
     };

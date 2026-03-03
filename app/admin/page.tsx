@@ -168,7 +168,7 @@ export default function AdminDashboard() {
       case "pending":
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "processing":
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "bg-emerald-100 text-blue-800 border-blue-200";
       case "completed":
         return "bg-green-100 text-green-800 border-green-200";
       case "cancelled":
@@ -496,84 +496,47 @@ export default function AdminDashboard() {
   return (
     <>
       <ToastContainer toasts={toast.toasts} removeToast={toast.removeToast} />
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
-      {/* Enhanced Header */}
-      <header className="bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-2xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="min-h-screen bg-gray-50 dark:bg-zinc-900">
+      {/* Header */}
+      <header className="bg-emerald-600 text-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-            <div className="flex items-center gap-4">
-              <div className="bg-white bg-opacity-20 rounded-full p-3 backdrop-blur-sm">
-                <svg
-                  className="w-8 h-8 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                  />
-                </svg>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
               </div>
               <div>
-                <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-                <p className="text-purple-100 text-sm">
-                  {user.name} • {user.email}
-                </p>
+                <h1 className="text-xl font-semibold">Admin Dashboard</h1>
+                <p className="text-emerald-100 text-sm">{user.name}</p>
               </div>
             </div>
-            <div className="flex gap-3 items-center">
+            <div className="flex gap-2">
               <ThemeToggle />
-              <button
-                onClick={() => setShowShortcutsModal(true)}
-                className="px-4 py-3 bg-white bg-opacity-20 text-white rounded-xl font-semibold hover:bg-opacity-30 transition-all duration-300 backdrop-blur-sm flex items-center gap-2"
-                title="Keyboard Shortcuts (Shift + ?)"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                </svg>
-              </button>
-              <button
-                onClick={() => router.push("/")}
-                className="px-6 py-3 bg-white text-purple-600 rounded-xl font-semibold hover:bg-purple-50 transition-all duration-300 shadow-lg hover:shadow-xl"
-              >
-                🏠 Home
-              </button>
-              <button
-                onClick={handleLogout}
-                className="px-6 py-3 bg-purple-800 text-white rounded-xl font-semibold hover:bg-purple-900 transition-all duration-300 shadow-lg"
-              >
-                Logout
-              </button>
+              <button onClick={() => router.push("/")} className="btn bg-white/20 hover:bg-white/30 text-sm px-4 py-2">Home</button>
+              <button onClick={handleLogout} className="btn bg-emerald-700 hover:bg-blue-800 text-sm px-4 py-2">Logout</button>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-xl shadow p-4 border-l-4 border-blue-500">
-            <p className="text-gray-600 text-xs font-medium uppercase">Total Bookings</p>
-            <p className="text-3xl font-bold text-gray-900 mt-1">{bookings.length}</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="card p-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400">Total</p>
+            <p className="text-2xl font-bold">{bookings.length}</p>
           </div>
-          <div className="bg-white rounded-xl shadow p-4 border-l-4 border-yellow-500">
-            <p className="text-gray-600 text-xs font-medium uppercase">Pending</p>
-            <p className="text-3xl font-bold text-gray-900 mt-1">
-              {bookings.filter((b) => b.status === "pending").length}
-            </p>
+          <div className="card p-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400">Pending</p>
+            <p className="text-2xl font-bold">{bookings.filter((b) => b.status === "pending").length}</p>
           </div>
-          <div className="bg-white rounded-xl shadow p-4 border-l-4 border-green-500">
-            <p className="text-gray-600 text-xs font-medium uppercase">Completed</p>
-            <p className="text-3xl font-bold text-gray-900 mt-1">
-              {bookings.filter((b) => b.status === "completed").length}
-            </p>
+          <div className="card p-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400">Completed</p>
+            <p className="text-2xl font-bold">{bookings.filter((b) => b.status === "completed").length}</p>
           </div>
-          <div className="bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl shadow p-4 text-white">
-            <p className="text-purple-100 text-xs font-medium uppercase">Revenue</p>
-            <p className="text-3xl font-bold mt-1">KES {calculateRevenue().toLocaleString()}</p>
+          <div className="card p-4 bg-emerald-600 text-white">
+            <p className="text-sm text-emerald-100">Revenue</p>
+            <p className="text-2xl font-bold">KES {calculateRevenue().toLocaleString()}</p>
           </div>
         </div>
 
@@ -589,8 +552,8 @@ export default function AdminDashboard() {
         </div>
 
         {/* Filters and Actions */}
-        <div className="bg-white rounded-xl shadow p-4 mb-4">
-          <div className="flex flex-col md:flex-row gap-3">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-5 mb-4 border border-slate-200/50 dark:border-slate-700/50">
+          <div className="flex flex-col md:flex-row gap-4">
             {/* Search */}
             <div className="flex-1 relative">
               <input
@@ -598,31 +561,31 @@ export default function AdminDashboard() {
                 placeholder="Search bookings..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full pl-12 pr-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:ring-4 focus:ring-violet-500/20 focus:border-violet-500 transition-all bg-slate-50 dark:bg-slate-700 dark:text-white"
               />
-              <svg className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-slate-400 absolute left-4 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
 
             {/* Status Filter */}
             <div className="flex gap-2 flex-wrap">
-              <button onClick={() => setFilter("all")} className={`px-3 py-2 rounded-lg text-sm font-medium ${filter === "all" ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-700"}`}>
+              <button onClick={() => setFilter("all")} className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${filter === "all" ? "bg-violet-600 text-white shadow-lg" : "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-violet-100 dark:hover:bg-violet-900/30"}`}>
                 All
               </button>
-              <button onClick={() => setFilter("pending")} className={`px-3 py-2 rounded-lg text-sm font-medium ${filter === "pending" ? "bg-yellow-500 text-white" : "bg-gray-100 text-gray-700"}`}>
+              <button onClick={() => setFilter("pending")} className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${filter === "pending" ? "bg-yellow-500 text-white shadow-lg" : "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-yellow-100 dark:hover:bg-yellow-900/30"}`}>
                 Pending
               </button>
-              <button onClick={() => setFilter("processing")} className={`px-3 py-2 rounded-lg text-sm font-medium ${filter === "processing" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700"}`}>
+              <button onClick={() => setFilter("processing")} className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${filter === "processing" ? "bg-emerald-500 text-white shadow-lg" : "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-emerald-100 dark:hover:bg-blue-900/30"}`}>
                 Processing
               </button>
-              <button onClick={() => setFilter("completed")} className={`px-3 py-2 rounded-lg text-sm font-medium ${filter === "completed" ? "bg-green-500 text-white" : "bg-gray-100 text-gray-700"}`}>
+              <button onClick={() => setFilter("completed")} className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${filter === "completed" ? "bg-emerald-500 text-white shadow-lg" : "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/30"}`}>
                 Completed
               </button>
             </div>
 
             {/* Sort */}
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium">
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="px-4 py-2.5 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm font-semibold bg-slate-50 dark:bg-slate-700 dark:text-white">
               <option value="date-desc">Newest</option>
               <option value="date-asc">Oldest</option>
               <option value="amount-desc">High Amount</option>
@@ -630,11 +593,18 @@ export default function AdminDashboard() {
             </select>
 
             {/* Actions */}
-            <button onClick={handleExportCSV} className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600">
+            <button onClick={handleExportCSV} className="px-5 py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-semibold hover:bg-emerald-600 transition-all shadow-md hover:shadow-lg flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
               Export
             </button>
-            <button onClick={() => setViewMode(viewMode === "cards" ? "table" : "cards")} className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300">
-              {viewMode === "cards" ? "Table" : "Cards"}
+            <button onClick={() => setViewMode(viewMode === "cards" ? "table" : "cards")} className="px-5 py-2.5 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl text-sm font-semibold hover:bg-slate-300 dark:hover:bg-slate-500 transition-all flex items-center gap-2">
+              {viewMode === "cards" ? (
+                <><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg> Table</>
+              ) : (
+                <><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg> Cards</>
+              )}
             </button>
           </div>
         </div>
@@ -669,7 +639,7 @@ export default function AdminDashboard() {
                     setBulkAction("processing");
                     setShowBulkActionsModal(true);
                   }}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-all"
+                  className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg font-semibold transition-all"
                 >
                   Set Processing
                 </button>
@@ -941,7 +911,7 @@ export default function AdminDashboard() {
                               setSelectedBooking(booking);
                               setShowDetailsModal(true);
                             }}
-                            className="text-blue-600 hover:text-blue-800 font-semibold"
+                            className="text-emerald-600 hover:text-blue-800 font-semibold"
                           >
                             View
                           </button>
@@ -1073,7 +1043,7 @@ export default function AdminDashboard() {
                 <div className="bg-gray-50 rounded-xl p-6">
                   <h4 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <svg
-                      className="w-5 h-5 text-blue-600"
+                      className="w-5 h-5 text-emerald-600"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -1244,7 +1214,7 @@ export default function AdminDashboard() {
                 <button
                   onClick={() => handleUpdateStatus("processing")}
                   disabled={updatingStatus || selectedBooking.status === "processing"}
-                  className="w-full bg-blue-500 text-white py-3 rounded-xl font-semibold hover:bg-blue-600 transition-all duration-300 shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full bg-emerald-500 text-white py-3 rounded-xl font-semibold hover:bg-emerald-600 transition-all duration-300 shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {getStatusIcon("processing")}
                   Set as Processing

@@ -133,15 +133,15 @@ export default function UserDashboard() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+        return "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 border-yellow-200 dark:border-yellow-800";
       case "processing":
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "bg-emerald-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-800";
       case "completed":
-        return "bg-green-100 text-green-800 border-green-200";
+        return "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 border-emerald-200 dark:border-emerald-800";
       case "cancelled":
-        return "bg-red-100 text-red-800 border-red-200";
+        return "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 border-red-200 dark:border-red-800";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700";
     }
   };
 
@@ -373,176 +373,46 @@ export default function UserDashboard() {
   return (
     <>
       <ToastContainer toasts={toast.toasts} removeToast={toast.removeToast} />
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-zinc-900">
       {/* Header */}
-      <header className="bg-white shadow-lg border-b-4 border-gradient-to-r from-blue-500 to-purple-600">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <header className="bg-white dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-700">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-            <div className="flex items-center gap-4">
-              <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-full p-3 shadow-lg">
-                <svg
-                  className="w-8 h-8 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  />
-                </svg>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
               </div>
               <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  Welcome back, {user.name}!
-                </h1>
-                <p className="text-gray-600 text-sm mt-1">
-                  {user.email} • Customer Dashboard
-                </p>
+                <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Welcome, {user.name}</h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
               </div>
             </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => router.push("/")}
-                className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all duration-300 hidden sm:block"
-              >
-                🏠 Home
-              </button>
-              <button
-                onClick={() => {
-                  setShowBookingForm(!showBookingForm);
-                  if (!showBookingForm) {
-                    setTimeout(() => {
-                      document.getElementById("booking-form")?.scrollIntoView({ behavior: "smooth" });
-                    }, 100);
-                  }
-                }}
-                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-              >
-                {showBookingForm ? "Hide Form" : "+ New Booking"}
-              </button>
-              <button
-                onClick={handleLogout}
-                className="px-6 py-3 border-2 border-red-300 text-red-600 rounded-xl font-semibold hover:bg-red-50 transition-all duration-300"
-              >
-                Logout
-              </button>
+            <div className="flex gap-2">
+              <button onClick={() => router.push("/")} className="btn btn-secondary text-sm px-4 py-2">Home</button>
+              <button onClick={handleLogout} className="btn border border-red-300 text-red-600 hover:bg-red-50 text-sm px-4 py-2">Logout</button>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Enhanced Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-blue-500 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Total Bookings</p>
-                <p className="text-4xl font-bold text-gray-900 mt-2">
-                  {bookings.length}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">All time</p>
-              </div>
-              <div className="bg-blue-100 rounded-full p-4">
-                <svg
-                  className="w-8 h-8 text-blue-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                  />
-                </svg>
-              </div>
-            </div>
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="card p-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400">Total Bookings</p>
+            <p className="text-2xl font-bold">{bookings.length}</p>
           </div>
-
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-yellow-500 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Pending</p>
-                <p className="text-4xl font-bold text-gray-900 mt-2">
-                  {bookings.filter((b) => b.status === "pending").length}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">Awaiting pickup</p>
-              </div>
-              <div className="bg-yellow-100 rounded-full p-4">
-                <svg
-                  className="w-8 h-8 text-yellow-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-            </div>
+          <div className="card p-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400">Pending</p>
+            <p className="text-2xl font-bold">{bookings.filter((b) => b.status === "pending").length}</p>
           </div>
-
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-green-500 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Completed</p>
-                <p className="text-4xl font-bold text-gray-900 mt-2">
-                  {bookings.filter((b) => b.status === "completed").length}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">Successfully done</p>
-              </div>
-              <div className="bg-green-100 rounded-full p-4">
-                <svg
-                  className="w-8 h-8 text-green-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-            </div>
+          <div className="card p-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400">Completed</p>
+            <p className="text-2xl font-bold">{bookings.filter((b) => b.status === "completed").length}</p>
           </div>
-
-          <div className="bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl shadow-lg p-6 text-white hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-purple-100 text-sm font-medium">Total Spent</p>
-                <p className="text-4xl font-bold mt-2">
-                  KES {calculateTotalSpent()}
-                </p>
-                <p className="text-xs text-purple-100 mt-1">On completed bookings</p>
-              </div>
-              <div className="bg-white bg-opacity-20 rounded-full p-4">
-                <svg
-                  className="w-8 h-8 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-            </div>
+          <div className="card p-4 bg-emerald-600 text-white">
+            <p className="text-sm text-emerald-100">Total Spent</p>
+            <p className="text-2xl font-bold">KES {calculateTotalSpent()}</p>
           </div>
         </div>
 
@@ -787,7 +657,7 @@ export default function UserDashboard() {
                   onClick={() => setFilter("processing")}
                   className={`px-4 py-2 rounded-lg font-semibold transition-all duration-300 ${
                     filter === "processing"
-                      ? "bg-blue-500 text-white shadow-lg"
+                      ? "bg-emerald-500 text-white shadow-lg"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
@@ -1055,7 +925,7 @@ export default function UserDashboard() {
               <div className="bg-gray-50 rounded-xl p-6">
                 <h4 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
                   <svg
-                    className="w-5 h-5 text-blue-600"
+                    className="w-5 h-5 text-emerald-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"

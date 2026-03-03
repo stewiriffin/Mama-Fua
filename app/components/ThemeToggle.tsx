@@ -30,7 +30,7 @@ export default function ThemeToggle() {
           </svg>
         ) : (
           <svg
-            className="w-3 h-3 text-blue-600"
+            className="w-3 h-3 text-emerald-600"
             fill="currentColor"
             viewBox="0 0 20 20"
           >

@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mama Fua - Professional Laundry Services",
-  description: "Fresh, clean clothes delivered to your doorstep. Choose from our flexible pricing plans based on weight. Fast, reliable, and affordable laundry service.",
+  title: "MAMA FUA - Professional Laundry Services",
+  description: "Fresh, clean clothes delivered to your doorstep. Fast and affordable laundry service in Nairobi.",
 };
 
 export default function RootLayout({

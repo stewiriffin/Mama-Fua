@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Login() {
   const router = useRouter();
@@ -76,7 +77,18 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <header className="py-4">
+        <div className="max-w-md mx-auto px-4">
+          <Link href="/" className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Home
+          </Link>
+        </div>
+      </header>
+      <div className="flex-1 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         {/* Logo/Brand */}
         <div className="text-center mb-8">
@@ -200,7 +212,7 @@ export default function Login() {
           </form>
 
           {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+          <div className="mt-6 p-4 bg-emerald-50 rounded-lg">
             <p className="text-sm font-semibold text-gray-700 mb-2">
               Demo Credentials:
             </p>

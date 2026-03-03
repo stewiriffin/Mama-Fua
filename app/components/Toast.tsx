@@ -92,7 +92,7 @@ export default function Toast({ message, type, duration = 5000, onClose }: Toast
       case "warning":
         return "bg-yellow-50 border-yellow-200 text-yellow-800";
       case "info":
-        return "bg-blue-50 border-blue-200 text-blue-800";
+        return "bg-emerald-50 border-blue-200 text-blue-800";
     }
   };
 
@@ -105,7 +105,7 @@ export default function Toast({ message, type, duration = 5000, onClose }: Toast
       case "warning":
         return "bg-yellow-500";
       case "info":
-        return "bg-blue-500";
+        return "bg-emerald-500";
     }
   };
 
